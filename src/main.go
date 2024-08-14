@@ -2,7 +2,6 @@ package main
 
 import (
 	"FirstTalkingInDaily.com/m/src/Utils"
-	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -51,6 +50,9 @@ func main() {
 	}
 	var firstTalker string = strings.ReplaceAll(strings.ToLower(GetRandomName(employesName)), " ", ".") + domainMail
 
-	fmt.Println(firstTalker)
+	err = SendEmail(firstTalker)
+	if err != nil {
+		log.Println(err)
+	}
 	os.Exit(0)
 }
