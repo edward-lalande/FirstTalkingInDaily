@@ -2,37 +2,47 @@ package main
 
 import (
 	"FirstTalkingInDaily.com/m/src/Utils"
+	"FirstTalkingInDaily.com/m/src/header"
+	"fmt"
 	"log"
 	"os"
 	"strings"
 )
 
-const FILEPATH_OF_EMPLOYES_NAME string = ".employes_name.txt"
-const FILEPATH_OF_CONFIGURATION string = ".config.txt"
-const INDEX_OF_COMPANY_NAME int = 1
-
 func isAleradyConfigure() bool {
-	_, err := os.Open(FILEPATH_OF_CONFIGURATION)
+	file, err := Utils.OpenFile(header.FILEPATH_OF_CONFIGURATION, "\n")
 
 	if err != nil {
 		return false
 	}
+
+	fmt.Println(file)
+	fmt.Println(len(file))
+	if len(file) != header.SIZE_OF_CONFIGURATION {
+		return false
+	}
+
 	return true
 }
 
-func getDomainMail() string {
-	domainMail, err := Utils.OpenFile(FILEPATH_OF_CONFIGURATION, ":")
+func getMailInformation() (string, string, string) {
+	file, err := Utils.OpenFile(header.FILEPATH_OF_CONFIGURATION, "\n")
 
 	if err != nil {
-		return ""
+		return "", "", ""
 	}
 
-	return domainMail[INDEX_OF_COMPANY_NAME]
+	return strings.Split(file[header.INDEX_OF_DOMAIN_MAIL], ":")[1],
+		strings.Split(file[header.INDEX_OF_SENDER_EMAIL], ":")[1],
+		strings.Split(file[header.INDEX_OF_SENDER_PASSWORD], ":")[1]
 }
 
 func main() {
 
-	if !isAleradyConfigure() {
+	value := isAleradyConfigure()
+
+	if !value {
+		fmt.Println("Configuration have not been done yet so let's do it!")
 		_, err := CreateConfiguration()
 
 		if err != nil {
@@ -40,9 +50,9 @@ func main() {
 			os.Exit(1)
 		}
 	}
-	domainMail := getDomainMail()
+	domainMail, email, password := getMailInformation()
 
-	employesName, err := Utils.OpenFile(FILEPATH_OF_EMPLOYES_NAME, "\n")
+	employesName, err := Utils.OpenFile(header.FILEPATH_OF_EMPLOYES_NAME, "\n")
 
 	if err != nil {
 		log.Println(err)
@@ -50,7 +60,7 @@ func main() {
 	}
 	var firstTalker string = strings.ReplaceAll(strings.ToLower(GetRandomName(employesName)), " ", ".") + domainMail
 
-	err = SendEmail(firstTalker)
+	err = SendEmail(email, password, firstTalker)
 	if err != nil {
 		log.Println(err)
 	}
